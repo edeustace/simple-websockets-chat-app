@@ -1,0 +1,8 @@
+{
+  "name" : "s",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "wscat" : "^4.0.1"
+  }
+}

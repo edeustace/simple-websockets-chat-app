@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+
+cd onconnect
+gcloud functions deploy ci-onconnect --trigger-http --project pie-ed-dev-221718 --allow-unauthenticated --runtime nodejs12 --entry-point handler
+
+# cd ../ondisconnect
+# gcloud functions deploy ci-ondisconnect --trigger-http --project pie-ed-dev-221718 --allow-unauthenticated --runtime nodejs12 --entry-point handler

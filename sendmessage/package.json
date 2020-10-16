@@ -5,7 +5,9 @@
   "main": "src/app.js",
   "author": "SAM CLI",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@google-cloud/firestore": "^4.4.0"
+  },
   "devDependencies": {
     "aws-sdk": "^2.739.0"
   }

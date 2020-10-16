@@ -22,6 +22,8 @@ The first and fastest way is to use AWS's Serverless Application Respository to 
 
 ## AWS CLI commands
 
+https://docs.aws.amazon.com/apigateway/latest/developerguide/setup-http-integrations.html
+
 If you prefer, you can install the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) and use it to package, deploy, and describe your application.  These are the commands you'll need to use:
 
 ```

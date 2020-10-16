@@ -2,10 +2,12 @@
   "name": "on-connect",
   "version": "1.0.0",
   "description": "onconnect example for WebSockets on API Gateway",
-  "main": "src/app.js",
+  "main": "index.js",
   "author": "SAM CLI",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@google-cloud/firestore" : "^4.4.0"
+  },
   "devDependencies": {
     "aws-sdk": "^2.739.0"
   }

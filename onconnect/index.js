@@ -9,9 +9,10 @@ const firestore = new Firestore();
 
 exports.handler = async (req, res) => {
   try {
+    console.log(req.path);
     console.log("connect handler", req.body);
-    console.log("connect headers", req.headers);
-    console.log("connect req", req);
+    // console.log("connect headers", req.headers);
+    // console.log("connect req", req);
     await firestore
       .collection("simple-chat-app-connections")
       .doc()

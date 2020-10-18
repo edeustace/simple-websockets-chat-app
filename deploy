@@ -1,8 +1,40 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
+const { exec } = require("child_process");
+const path = require("path");
 
+const cmd = (name) =>
+  `gcloud functions deploy ${name} --trigger-http --project pie-ed-dev-221718 --allow-unauthenticated --runtime nodejs12 --entry-point handler`;
 
-cd onconnect
-gcloud functions deploy ci-onconnect --trigger-http --project pie-ed-dev-221718 --allow-unauthenticated --runtime nodejs12 --entry-point handler
+const ep = (name) => {
+  return new Promise((resolve, reject) => {
+    const c = cmd(name);
+    const cwd = path.resolve(__dirname, name);
+    console.log(`deploy: ${c}, cwd: ${cwd}`);
+    exec(
+      c,
+      {
+        stdio: "inherit",
+        cwd,
+      },
+      (e) => {
+        if (e) {
+          reject(e);
+        } else {
+          resolve();
+        }
+      }
+    );
+  });
+};
 
-# cd ../ondisconnect
-# gcloud functions deploy ci-ondisconnect --trigger-http --project pie-ed-dev-221718 --allow-unauthenticated --runtime nodejs12 --entry-point handler
+const run = async () => {
+  await Promise.all([ep("onconnect"), ep("ondisconnect"), ep("sendmessage")]);
+};
+
+run()
+  .then(() => {
+    console.log("done");
+  })
+  .catch((e) => {
+    console.error(e);
+  });

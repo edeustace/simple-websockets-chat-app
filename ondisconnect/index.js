@@ -21,7 +21,13 @@ exports.handler = async (req, res) => {
       .where("connectionId", "==", req.body.connectionId)
       .get();
 
-    await Promise.all(docs.map((d) => d.ref.delete()));
+    const b = firestore.batch();
+
+    docs.forEach((d) => {
+      b.delete(d.ref);
+    });
+
+    await b.commit();
     res.status(200).send("");
   } catch (err) {
     res.status(500).send("");

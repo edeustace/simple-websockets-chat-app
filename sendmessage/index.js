@@ -1,55 +1,67 @@
-// Copyright 2018-2020Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
+const { Firestore } = require("@google-cloud/firestore");
+const util = require("util");
+const centra = require("centra");
 const AWS = require("aws-sdk");
 
-// const ddb = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION });
-
-// const { TABLE_NAME } = process.env;
+const fs = new Firestore();
 
 exports.handler = async (req, res) => {
   console.log("req.body:", req.body);
 
+  const domainName = req.body.domainName;
+  const stage = req.body.stage;
+
+  const coll = fs.collection("simple-chat-app-connections");
+  const sn = await coll.get();
+  const apigwManagementApi = new AWS.ApiGatewayManagementApi({
+    apiVersion: "2018-11-29",
+    endpoint: domainName + "/" + stage,
+    region: "us-east-2",
+  });
+
+  await Promise.all(
+    sn.docs.map(async (sn) => {
+      const connectionId = sn.data().connectionId;
+
+      try {
+        const postData = JSON.stringify({
+          action: "message",
+          message: req.body.data.data,
+        });
+        await apigwManagementApi
+          .postToConnection({ ConnectionId: connectionId, Data: postData })
+          .promise();
+      } catch (e) {
+        if (e.statusCode === 410) {
+          console.log(`Found stale connection, deleting ${connectionId}`);
+          await sn.ref.delete();
+        } else {
+          throw e;
+        }
+      }
+
+      // const callbackUrl = util.format(
+      //   util.format(
+      //     "https://%s/%s/@connections/%s",
+      //     domain,
+      //     stage,
+      //     connectionId
+      //   )
+      // );
+
+      // console.log("url:", callbackUrl);
+      // const response = await centra(callbackUrl, "POST")
+      //   .body({ message: req.body.data.data }, "json")
+      //   .send();
+
+      // console.log("response.statusCode:", response.statusCode);
+
+      // if (response.statusCode === 410) {
+      //   console.log(`Found stale connection, deleting ${connectionId}`);
+      //   await sn.ref.delete();
+      // }
+    })
+  );
+
   res.send("");
-
-  // try {
-  //   connectionData = await ddb
-  //     .scan({ TableName: TABLE_NAME, ProjectionExpression: "connectionId" })
-  //     .promise();
-  // } catch (e) {
-  //   return { statusCode: 500, body: e.stack };
-  // }
-
-  // const apigwManagementApi = new AWS.ApiGatewayManagementApi({
-  //   apiVersion: "2018-11-29",
-  //   endpoint:
-  //     event.requestContext.domainName + "/" + event.requestContext.stage,
-  // });
-
-  // const postData = JSON.parse(event.body).data;
-
-  // const postCalls = connectionData.Items.map(async ({ connectionId }) => {
-  //   try {
-  //     await apigwManagementApi
-  //       .postToConnection({ ConnectionId: connectionId, Data: postData })
-  //       .promise();
-  //   } catch (e) {
-  //     if (e.statusCode === 410) {
-  //       console.log(`Found stale connection, deleting ${connectionId}`);
-  //       await ddb
-  //         .delete({ TableName: TABLE_NAME, Key: { connectionId } })
-  //         .promise();
-  //     } else {
-  //       throw e;
-  //     }
-  //   }
-  // });
-
-  // try {
-  //   await Promise.all(postCalls);
-  // } catch (e) {
-  //   return { statusCode: 500, body: e.stack };
-  // }
-
-  // return { statusCode: 200, body: "Data sent." };
 };
